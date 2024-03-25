@@ -26,64 +26,68 @@ class TestBooksCollector:
     # напиши свои тесты ниже
     # чтобы тесты были независимыми в каждом из них создавай отдельный экземпляр класса BooksCollector()
 
-    def test_add_new_book_name_not_have_genre(self):
-        collector = BooksCollector()
+    def test_add_new_book_collector_book_not_have_genre(self, collector):
         name = 'Гордость и предубеждение и зомби'
         collector.add_new_book(name)
         assert collector.get_book_genre(name) == ''
 
-    def test_add_new_book_with_empty_name_is_not_added(self):
-        collector = BooksCollector()
-        name = ''
+    def test_set_book_genre_collector_should_be_added(self, collector):
+        collector.add_new_book('Гарфилд')
+        collector.set_book_genre('Гарфилд', 'Комедии')
+        assert collector.get_book_genre('Гарфилд') == 'Комедии'
+
+    @pytest.mark.parametrize(
+        'book_name',
+        [
+            "",
+            "Звездные войны Эпоха Республики. Дарт Мол",
+            "Звёздные войны. Эпоха Восстания. Боба Фетт",
+            "Звездные войны Эпоха Восстания. Дарт Вейдер",
+        ]
+    )
+    def test_add_new_book_collector_book_name_not_added(self, collector, book_name):
+        collector.add_new_book(book_name)
+        assert book_name not in collector.get_books_genre()
+
+    @pytest.mark.parametrize(
+        'name',
+        [
+            'А',
+            'Ра',
+            'Звёздные войны: Дарт Бейн. Династия зла',
+            'Звёздные войны: Старая Республика. Реван'
+        ]
+    )
+    def test_add_new_book_collector_book_name_should_be_added(self, collector, name):
         collector.add_new_book(name)
-        assert name not in collector.get_books_genre()
+        assert name in collector.get_books_genre()
 
-    @pytest.mark.parametrize('genre', ['Фантастика', 'Ужасы', 'Детективы', 'Мультфильмы', 'Комедии'])
-    def test_set_book_genre_should_be_added_(self, genre):
-        collector = BooksCollector()
-        name = 'Гарри Поттер'
-        collector.add_new_book(name)
-        collector.set_book_genre(name, genre)
-        assert collector.get_book_genre(name) == genre
+    def test_get_books_with_specific_genre_collector_get_list_of_books(self, collector):
+        collector.add_new_book('Гордость и предубеждение и зомби')
+        collector.set_book_genre('Гордость и предубеждение и зомби', 'Ужасы')
+        assert collector.get_books_with_specific_genre('Ужасы') == ['Гордость и предубеждение и зомби']
 
-    def test_add_new_book_name_should_be_added(self, book_dict):
-        collector = BooksCollector()
-        collector.add_new_book(book_dict['name'])
-        assert book_dict['name'] in collector.get_books_genre()
+    def test_get_books_for_children_collector_not_added(self, collector):
+        collector.add_new_book('Синистер')
+        collector.set_book_genre('Синистер', 'Ужасы')
+        assert collector.get_books_for_children() != 'Ужасы'
 
-    def test_get_books_with_specific_genre_book_dict_get_list_of_books(self, book_dict):
-        collector = BooksCollector()
-        collector.add_new_book(book_dict['name'])
-        collector.set_book_genre(book_dict['name'], book_dict['genre'])
-        assert collector.get_books_with_specific_genre(book_dict['genre']) == [book_dict['name']]
+    def test_add_book_in_favorites_collector_should_be_added(self, collector):
+        collector.add_new_book('Гордость и предубеждение и зомби')
+        collector.set_book_genre('Гордость и предубеждение и зомби', 'Ужасы')
+        collector.add_book_in_favorites('Гордость и предубеждение и зомби')
+        assert 'Гордость и предубеждение и зомби' in collector.get_list_of_favorites_books()
 
-    @pytest.mark.parametrize('genre_age_rating', ['Ужасы', 'Детективы'])
-    def test_get_books_for_children_genre_age_rating_not_added(self, genre_age_rating):
-        collector = BooksCollector()
-        name = 'Синистер'
-        collector.add_new_book(name)
-        collector.set_book_genre(name, genre_age_rating)
-        assert collector.get_books_for_children() != genre_age_rating
-
-    def test_add_book_in_favorites_book_dict_should_be_added(self, book_dict):
-        collector = BooksCollector()
-        collector.add_new_book(book_dict['name'])
-        collector.set_book_genre(book_dict['name'], book_dict['genre'])
-        collector.add_book_in_favorites(book_dict['name'])
-        assert book_dict['name'] in collector.get_list_of_favorites_books()
-
-    def test_add_book_in_favorites_book_dict_not_add_book_twice(self, book_dict):
-        collector = BooksCollector()
-        collector.add_new_book(book_dict['name'])
-        collector.set_book_genre(book_dict['name'], book_dict['genre'])
-        collector.add_book_in_favorites(book_dict['name'])
-        collector.add_book_in_favorites(book_dict['name'])
+    def test_add_book_in_favorites_collector_not_add_book_twice(self, collector):
+        collector.add_new_book('Гордость и предубеждение и зомби')
+        collector.set_book_genre('Гордость и предубеждение и зомби', 'Ужасы')
+        collector.add_book_in_favorites('Гордость и предубеждение и зомби')
+        collector.add_book_in_favorites('Гордость и предубеждение и зомби')
         assert len(collector.get_list_of_favorites_books()) == 1
 
-    def test_delete_book_from_favorites_book_dict_should_be_deleted(self, book_dict):
-        collector = BooksCollector()
-        collector.add_new_book(book_dict['name'])
-        collector.set_book_genre(book_dict['name'], book_dict['genre'])
-        collector.add_book_in_favorites(book_dict['name'])
-        collector.delete_book_from_favorites(book_dict['name'])
-        assert book_dict['name'] not in collector.get_list_of_favorites_books()
+    def test_delete_book_from_favorites_collector_should_be_deleted(self, collector):
+        collector.add_new_book('Гордость и предубеждение и зомби')
+        collector.set_book_genre('Гордость и предубеждение и зомби', 'Ужасы')
+        collector.add_book_in_favorites('Гордость и предубеждение и зомби')
+        collector.delete_book_from_favorites('Гордость и предубеждение и зомби')
+        assert 'Гордость и предубеждение и зомби' not in collector.get_list_of_favorites_books()
